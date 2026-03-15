@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cashify Brand Study — Section B, Group 8</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  :root{
+    --bg:#0a0e1a;--surface:#111827;--card:#1a2235;--border:#1e2d47;
+    --cashify:#f97316;--cashify2:#fb923c;--accent:#6366f1;--green:#10b981;
+    --red:#ef4444;--yellow:#f59e0b;--text:#e2e8f0;--muted:#64748b;
+    --blue:#3b82f6;--purple:#8b5cf6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:Inter,sans-serif;font-size:14px;min-height:100vh;}
+  .topbar{background:linear-gradient(135deg,#0f172a 0%,#1a2a4a 100%);border-bottom:1px solid var(--border);
+    padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .logo{display:flex;align-items:center;gap:14px;}
+  .logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--cashify),var(--cashify2));
+    border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;}
+  .logo-text h1{font-size:18px;font-weight:700;color:#fff;}
+  .logo-text p{font-size:12px;color:var(--muted);}
+  .badge{background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);
+    color:var(--cashify);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+  .tab-bar{display:flex;gap:4px;background:rgba(255,255,255,.05);padding:4px;border-radius:10px;}
+  .tab{padding:8px 16px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;
+    color:var(--muted);transition:all .2s;border:none;background:none;}
+  .tab.active{background:var(--cashify);color:#fff;}
+  .tab:hover:not(.active){background:rgba(255,255,255,.08);color:var(--text);}
+  .page{display:none;padding:28px 32px 60px;}
+  .page.active{display:block;}
+  .section-title{font-size:22px;font-weight:700;margin-bottom:4px;}
+  .section-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+  .grid{display:grid;gap:20px;}
+  .g2{grid-template-columns:1fr 1fr;}
+  .g3{grid-template-columns:1fr 1fr 1fr;}
+  .g4{grid-template-columns:repeat(4,1fr);}
+  .g5{grid-template-columns:repeat(5,1fr);}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;}
+  .card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;}
+  .kpi{text-align:center;padding:24px 16px;}
+  .kpi-val{font-size:40px;font-weight:800;line-height:1;}
+  .kpi-label{font-size:12px;color:var(--muted);margin-top:6px;}
+  .kpi-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .nps-pos{color:var(--green);}
+  .nps-neg{color:var(--red);}
+  .nps-bar{height:10px;border-radius:5px;display:flex;overflow:hidden;margin-top:8px;}
+  .nps-p{background:var(--green);}
+  .nps-pa{background:var(--yellow);}
+  .nps-d{background:var(--red);}
+  canvas{width:100%!important;}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .bar-label{font-size:12px;color:var(--text);width:150px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bar-track{flex:1;height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:4px;}
+  .bar-count{font-size:12px;color:var(--muted);width:40px;text-align:right;flex-shrink:0;}
+  .funnel-step{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.04);
+    border-radius:8px;margin-bottom:6px;border-left:3px solid var(--cashify);}
+  .funnel-name{flex:1;font-size:13px;}
+  .funnel-pct{font-size:18px;font-weight:700;color:var(--cashify);}
+  .pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;margin:2px;}
+  .pill-green{background:rgba(16,185,129,.15);color:var(--green);}
+  .pill-red{background:rgba(239,68,68,.15);color:var(--red);}
+  .pill-blue{background:rgba(99,102,241,.15);color:#818cf8;}
+  .pill-yellow{background:rgba(245,158,11,.15);color:var(--yellow);}
+  .switch-btn{display:flex;gap:4px;background:rgba(255,255,255,.05);padding:4px;border-radius:8px;margin-bottom:16px;width:fit-content;}
+  .sw{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;
+    color:var(--muted);transition:all .2s;border:none;background:none;}
+  .sw.on{background:var(--accent);color:#fff;}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:11px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--border);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+  td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;}
+  tr:last-child td{border-bottom:none;}
+  .rank{color:var(--cashify);font-weight:700;width:24px;}
+  .highlight{background:rgba(249,115,22,.07);}
+  select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;
+    padding:8px 12px;font-size:13px;font-family:inherit;outline:none;cursor:pointer;}
+  .tooltip-inner{font-size:12px;}
+  @media(max-width:900px){.g2,.g3,.g4,.g5{grid-template-columns:1fr!important;}.topbar{flex-direction:column;gap:12px;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">C↩</div>
+    <div class="logo-text">
+      <h1>Cashify Brand Study Dashboard</h1>
+      <p>Section B · Group 8 · Live Brand Study 2024</p>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="badge">📊 3,242 Total Respondents</div>
+    <div class="tab-bar">
+      <button class="tab active" onclick="showPage('overview')">Overview</button>
+      <button class="tab" onclick="showPage('refurbished')">Refurbished</button>
+      <button class="tab" onclick="showPage('buyback')">Buyback</button>
+      <button class="tab" onclick="showPage('nps')">NPS</button>
+      <button class="tab" onclick="showPage('funnel')">Funnel</button>
+      <button class="tab" onclick="showPage('drivers')">Drivers</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERVIEW PAGE -->
+<div class="page active" id="page-overview">
+  <div class="section-title">📈 Study Overview</div>
+  <div class="section-sub">Summary of both Refurbished and Buyback studies — all respondents</div>
+
+  <div class="grid g4" style="margin-bottom:20px;">
+    <div class="card kpi">
+      <div class="kpi-val" style="color:var(--cashify)">1,717</div>
+      <div class="kpi-label">Refurbished Study</div>
+      <div class="kpi-sub">Total Respondents</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-val" style="color:var(--accent)">1,525</div>
+      <div class="kpi-label">Buyback Study</div>
+      <div class="kpi-sub">Total Respondents</div>
+    </div>
+    <div class="card kpi">
+      <div id="ref-nps-val" class="kpi-val nps-neg">–</div>
+      <div class="kpi-label">Cashify NPS — Refurbished</div>
+      <div class="kpi-sub">Net Promoter Score</div>
+    </div>
+    <div class="card kpi">
+      <div id="buy-nps-val" class="kpi-val nps-neg">–</div>
+      <div class="kpi-label">Cashify NPS — Buyback</div>
+      <div class="kpi-sub">Net Promoter Score</div>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title">📍 City Distribution — Refurbished</div>
+      <canvas id="city-ref-chart" height="200"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">📍 City Distribution — Buyback</div>
+      <canvas id="city-buy-chart" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="grid g3" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title">👤 Demographics — Refurbished</div>
+      <canvas id="gender-ref-chart" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">🎂 Age Groups — Refurbished</div>
+      <canvas id="age-ref-chart" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">💰 Household Income</div>
+      <canvas id="income-ref-chart" height="180"></canvas>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title">🏆 Top of Mind Brand Recall — Refurbished</div>
+      <canvas id="tom-ref-chart" height="220"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 Top of Mind Brand Recall — Buyback</div>
+      <canvas id="tom-buy-chart" height="220"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- REFURBISHED PAGE -->
+<div class="page" id="page-refurbished">
+  <div class="section-title">♻️ Refurbished Category Study</div>
+  <div class="section-sub">Consumer awareness, consideration and purchase behavior for refurbished phones</div>
+
+  <div class="grid g3" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title">📢 Aided Brand Awareness</div>
+      <div id="aided-ref-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">�� Spontaneous Awareness</div>
+      <div id="spont-ref-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎯 Source of Cashify Awareness</div>
+      <div id="src-cashify-bars"></div>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title">🤔 Brand Familiarity Levels</div>
+      <canvas id="famil-ref-chart" height="280"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">✅ Brand Consideration</div>
+      <canvas id="consid-ref-chart" height="280"></canvas>
+    </div>
+  </div>
+
+  <div class="grid g3" style="margin-bottom:20px;">
+    <div class="card kpi">
+      <div id="ref-ever-buy" class="kpi-val" style="color:var(--accent)">–</div>
+      <div class="kpi-label">Ever Bought Refurbished</div>
+      <div class="kpi-sub">% of respondents</div>
+    </div>
+    <div class="card kpi">
+      <div id="ref-intent" class="kpi-val" style="color:var(--green)">–</div>
+      <div class="kpi-label">Purchase Intent (12 months)</div>
+      <div class="kpi-sub">Definitely + Probably Would</div>
+    </div>
+    <div class="card kpi">
+      <div id="ref-online-pct" class="kpi-val" style="color:var(--yellow)">–</div>
+      <div class="kpi-label">Bought Online</div>
+      <div class="kpi-sub">vs Offline</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title">🛡️ Trust Drivers (Category)</div>
+      <div id="cat-drivers-ref-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">😨 Barriers to Purchase</div>
+      <div id="fears-ref-bars"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BUYBACK PAGE -->
+<div class="page" id="page-buyback">
+  <div class="section-title">📱 Buyback Category Study</div>
+  <div class="section-sub">Consumer behavior and platform preferences for phone buyback</div>
+
+  <div class="grid g3" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title">📢 Aided Brand Awareness — Buyback</div>
+      <div id="aided-buy-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🤔 Brand Familiarity — Buyback</div>
+      <canvas id="famil-buy-chart" height="230"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">✅ Brand Consideration — Buyback</div>
+      <canvas id="consid-buy-chart" height="230"></canvas>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title">🛡️ Trust Drivers — Buyback</div>
+      <div id="cat-drivers-buy-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ Barriers to Selling — Buyback</div>
+      <div id="barriers-buy-bars"></div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title">💰 Choice Drivers — Importance Ranking</div>
+      <canvas id="drivers-buy-chart" height="280"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">😨 Fears about Selling Phone</div>
+      <div id="fears-buy-bars"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NPS PAGE -->
+<div class="page" id="page-nps">
+  <div class="section-title">⭐ Net Promoter Scores</div>
+  <div class="section-sub">Likelihood to recommend — scored 0–10 across all platforms</div>
+
+  <div class="switch-btn">
+    <button class="sw on" id="sw-ref-nps" onclick="switchNPS('ref')">Refurbished</button>
+    <button class="sw" id="sw-buy-nps" onclick="switchNPS('buy')">Buyback</button>
+  </div>
+
+  <div id="nps-ref-section">
+    <div class="grid g3" style="margin-bottom:20px;">
+      <div class="card kpi" id="nps-cashify-ref-card">
+        <div id="nps-cashify-ref" class="kpi-val">–</div>
+        <div class="kpi-label">Cashify NPS</div>
+        <div id="nps-cr-bar" class="nps-bar" style="margin-top:12px;"></div>
+        <div id="nps-cr-detail" style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">NPS Comparison — All Refurbished Platforms</div>
+      <canvas id="nps-ref-chart" height="220"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">NPS Breakdown Table — Refurbished</div>
+      <table>
+        <thead><tr><th>#</th><th>Platform</th><th>NPS</th><th>Promoters</th><th>Passives</th><th>Detractors</th><th>Avg Score</th><th>Total</th></tr></thead>
+        <tbody id="nps-ref-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="nps-buy-section" style="display:none;">
+    <div class="grid g3" style="margin-bottom:20px;">
+      <div class="card kpi">
+        <div id="nps-cashify-buy" class="kpi-val">–</div>
+        <div class="kpi-label">Cashify NPS — Buyback</div>
+        <div id="nps-cb-bar" class="nps-bar" style="margin-top:12px;"></div>
+        <div id="nps-cb-detail" style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">NPS Comparison — All Buyback Platforms</div>
+      <canvas id="nps-buy-chart" height="220"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">NPS Breakdown Table — Buyback</div>
+      <table>
+        <thead><tr><th>#</th><th>Platform</th><th>NPS</th><th>Promoters</th><th>Passives</th><th>Detractors</th><th>Avg Score</th><th>Total</th></tr></thead>
+        <tbody id="nps-buy-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- FUNNEL PAGE -->
+<div class="page" id="page-funnel">
+  <div class="section-title">🔽 Brand Funnel Analysis</div>
+  <div class="section-sub">Awareness → Familiarity → Consideration → Used — for each platform</div>
+
+  <div class="switch-btn">
+    <button class="sw on" id="sw-ref-funnel" onclick="switchFunnel('ref')">Refurbished</button>
+    <button class="sw" id="sw-buy-funnel" onclick="switchFunnel('buy')">Buyback</button>
+  </div>
+
+  <div id="funnel-ref-section">
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">Brand Funnel — Refurbished Platforms</div>
+      <canvas id="funnel-ref-chart" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Funnel Detail Table</div>
+      <table>
+        <thead><tr><th>Platform</th><th>Aware %</th><th>Familiar %</th><th>Considered %</th><th>Used %</th></tr></thead>
+        <tbody id="funnel-ref-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="funnel-buy-section" style="display:none;">
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">Brand Funnel — Buyback Platforms</div>
+      <canvas id="funnel-buy-chart" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Funnel Detail Table</div>
+      <table>
+        <thead><tr><th>Platform</th><th>Aware %</th><th>Familiar %</th><th>Considered %</th><th>Used %</th></tr></thead>
+        <tbody id="funnel-buy-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- DRIVERS PAGE -->
+<div class="page" id="page-drivers">
+  <div class="section-title">🎯 Choice Drivers & Barriers</div>
+  <div class="section-sub">What drives platform selection and what holds consumers back</div>
+
+  <div class="grid g2" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title">🏆 Choice Drivers — Refurbished (Weighted Score)</div>
+      <canvas id="drivers-ref-chart" height="280"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 Choice Drivers — Buyback (Weighted Score)</div>
+      <canvas id="drivers-buy2-chart" height="280"></canvas>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title">🚧 Barriers — Refurbished Not Purchased</div>
+      <div id="barriers-ref-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🚧 Barriers — Buyback Not Completed</div>
+      <div id="barriers-buy2-bars"></div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title">✅ Trust Factors that Would Convince Purchase</div>
+      <div id="cat-drivers-ref2-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">✅ Trust Factors — Buyback</div>
+      <div id="cat-drivers-buy2-bars"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const D = {"ref": {"total": 1717, "city": {"Delhi NCR": 761, "Tier-2 / Tier-3 (Specify)": 251, "Mumbai": 206, "Bangalore": 155, "Kolkata": 98, "Hyderabad": 94, "Ahmedabad": 76, "Chennai": 76}, "gender": {"Male": 939, "Female": 652, "Other / Prefer not to say": 126}, "age": {"18\u201325": 827, "26\u201335": 484, "46+": 174, "36\u201345": 129, "<18": 103}, "income": {">\u20b92L": 457, "\u20b91\u20131.5L": 282, "\u20b975k\u20131L": 221, "\u20b91.5\u20132L": 203, "\u20b950\u201375k": 201, "\u20b925\u201350k": 182, "<\u20b925k": 171}, "tom": {"Cashify": 360, "Amazon": 136, "Olx": 111, "Apple": 83, "Samsung": 64, "Iphone": 33, "Flipkart": 26, "Croma": 10, "Amazon, Flipkart": 6, "Brand": 5}, "spont": {"Cashify": 120, "Olx": 114, "Amazon": 105, "Flipkart": 60, "Samsung": 11, "Ebay": 10, "Local Shops": 9, "Amazon, Flipkart": 9, "Offline Stores": 8, "Croma": 7}, "aided": {"Cashify": 987, "OLX": 906, "Amazon Renewed": 713, "Local shop/used-phone market": 636, "Flipkart Reset": 470, "Other (specify)": 364, "Facebook Marketplace / Instagram sellers": 353, "Never heard of any": 99, "Sahivalue": 73, "XtraCover": 68}, "src": {"Cashify": {"Google search": 363, "Social media ad (Instagram/Facebook)": 345, "TV ad": 235, "YouTube review/Unboxing": 223, "Offline store": 216, "Influencer video recommending it": 199, "Price\u2013comparison site/Deal\u2013blog": 176, "Saw as brand integration on a Youtube show": 173}, "Amazon Renewed": {"Google search": 332, "Social media ad (Instagram/Facebook)": 223, "Price\u2013comparison site/Deal\u2013blog": 162, "YouTube review/Unboxing": 152, "TV ad": 109, "Influencer video recommending it": 98, "Saw as brand integration on a Youtube show": 82, "Offline store": 62}, "Flipkart Reset": {"Google search": 192, "Social media ad (Instagram/Facebook)": 153, "YouTube review/Unboxing": 99, "TV ad": 87, "Price\u2013comparison site/Deal\u2013blog": 87, "Influencer video recommending it": 75, "Saw as brand integration on a Youtube show": 66, "Offline store": 44}, "OLX": {"TV ad": 385, "Google search": 332, "Social media ad (Instagram/Facebook)": 309, "YouTube review/Unboxing": 175, "Price\u2013comparison site/Deal\u2013blog": 139, "Influencer video recommending it": 116, "Saw as brand integration on a Youtube show": 100, "Offline store": 87}, "Local Shop": {"Offline store": 400, "Google search": 128, "Social media ad (Instagram/Facebook)": 78, "Price\u2013comparison site/Deal\u2013blog": 61, "YouTube review/Unboxing": 60, "TV ad": 58, "Influencer video recommending it": 57, "Saw as brand integration on a Youtube show": 41}, "Facebook Mkt": {"Social media ad (Instagram/Facebook)": 180, "Google search": 125, "Influencer video recommending it": 65, "Price\u2013comparison site/Deal\u2013blog": 64, "YouTube review/Unboxing": 62, "TV ad": 43, "Saw as brand integration on a Youtube show": 40, "Offline store": 31}}, "familiarity": {"Cashify": {"Heard a lot but never considered": 392, "Have considered using it but never used": 353, "Heard a little but never considered using it": 292, "Never heard of it": 251, "Have used it to buy refurbished device but it was sometime back.": 158, "I used it recently to buy refurbished device within last 6 months": 117}, "Amazon Renewed": {"Never heard of it": 403, "Heard a lot but never considered": 312, "Heard a little but never considered using it": 291, "Have considered using it but never used": 284, "Have used it to buy refurbished device but it was sometime back.": 165, "I used it recently to buy refurbished device within last 6 months": 108}, "Flipkart Reset": {"Never heard of it": 552, "Heard a little but never considered using it": 292, "Heard a lot but never considered": 258, "Have considered using it but never used": 233, "Have used it to buy refurbished device but it was sometime back.": 131, "I used it recently to buy refurbished device within last 6 months": 97}, "OLX": {"Heard a lot but never considered": 452, "Have considered using it but never used": 321, "Heard a little but never considered using it": 312, "Never heard of it": 195, "Have used it to buy refurbished device but it was sometime back.": 166, "I used it recently to buy refurbished device within last 6 months": 117}, "Quikr": {"Heard a lot but never considered": 390, "Heard a little but never considered using it": 306, "Have considered using it but never used": 299, "Never heard of it": 245, "Have used it to buy refurbished device but it was sometime back.": 206, "I used it recently to buy refurbished device within last 6 months": 117}, "Facebook Mkt": {"Never heard of it": 399, "Heard a lot but never considered": 376, "Heard a little but never considered using it": 361, "Have considered using it but never used": 220, "Have used it to buy refurbished device but it was sometime back.": 111, "I used it recently to buy refurbished device within last 6 months": 96}}, "consideration": {"Cashify": {"I might consider it": 574, "I would seriously consider it": 345, "I would not consider it": 340, "It would be my first choice": 304}, "Amazon Renewed": {"I might consider it": 588, "I would not consider it": 399, "I would seriously consider it": 326, "It would be my first choice": 250}, "Flipkart Reset": {"I might consider it": 599, "I would not consider it": 518, "I would seriously consider it": 276, "It would be my first choice": 170}, "OLX": {"I might consider it": 628, "I would not consider it": 451, "I would seriously consider it": 276, "It would be my first choice": 208}, "Quikr": {"I might consider it": 572, "I would not consider it": 463, "I would seriously consider it": 288, "It would be my first choice": 240}, "Facebook Mkt": {"I would not consider it": 685, "I might consider it": 513, "I would seriously consider it": 207, "It would be my first choice": 158}}, "nps": {"Cashify": {"nps": -25.5, "promoters": 377, "passives": 411, "detractors": 775, "total": 1563, "pp": 24.1, "dp": 49.6, "pap": 26.3, "avg": 5.9}, "Amazon Renewed": {"nps": -34.7, "promoters": 285, "passives": 450, "detractors": 828, "total": 1563, "pp": 18.2, "dp": 53.0, "pap": 28.8, "avg": 5.6}, "Flipkart Reset": {"nps": -49.8, "promoters": 191, "passives": 403, "detractors": 969, "total": 1563, "pp": 12.2, "dp": 62.0, "pap": 25.8, "avg": 5.0}, "OLX": {"nps": -51.4, "promoters": 206, "passives": 347, "detractors": 1010, "total": 1563, "pp": 13.2, "dp": 64.6, "pap": 22.2, "avg": 4.9}, "Quikr": {"nps": -51.2, "promoters": 216, "passives": 331, "detractors": 1016, "total": 1563, "pp": 13.8, "dp": 65.0, "pap": 21.2, "avg": 4.9}, "Facebook Mkt": {"nps": -67.9, "promoters": 120, "passives": 262, "detractors": 1181, "total": 1563, "pp": 7.7, "dp": 75.6, "pap": 16.8, "avg": 4.1}}, "funnel": {"Cashify": {"aware": 1466, "familiar": 1312, "considered": 649, "used": 275, "aware_pct": 85.4, "familiar_pct": 76.4, "considered_pct": 37.8, "used_pct": 16.0}, "Amazon Renewed": {"aware": 1314, "familiar": 1160, "considered": 576, "used": 273, "aware_pct": 76.5, "familiar_pct": 67.6, "considered_pct": 33.5, "used_pct": 15.9}, "Flipkart Reset": {"aware": 1165, "familiar": 1011, "considered": 446, "used": 228, "aware_pct": 67.9, "familiar_pct": 58.9, "considered_pct": 26.0, "used_pct": 13.3}, "OLX": {"aware": 1522, "familiar": 1368, "considered": 484, "used": 283, "aware_pct": 88.6, "familiar_pct": 79.7, "considered_pct": 28.2, "used_pct": 16.5}, "Quikr": {"aware": 1472, "familiar": 1318, "considered": 528, "used": 323, "aware_pct": 85.7, "familiar_pct": 76.8, "considered_pct": 30.8, "used_pct": 18.8}, "Facebook Mkt": {"aware": 1318, "familiar": 1164, "considered": 365, "used": 207, "aware_pct": 76.8, "familiar_pct": 67.8, "considered_pct": 21.3, "used_pct": 12.1}}, "intent": {"Definitely not": 486, "Probably not": 450, "Maybe": 319, "Probably would": 189, "Definitely would": 119}, "ever_used": {"No": 1458, "Yes": 204}, "channel": {"Online": 113, "Offline": 91}, "drivers": {"Home pickup": 58, "Reviews/Ratings": 54, "No negotiation": 45, "Warranty": 41, "Instant payment": 39, "Easy process": 39, "Data safety": 35, "Friend rec.": 34, "Good price": 24, "Brand name": 21, "Wide support": 21, "Quick estimate": 19}, "barriers": {"Was not aware that Cashify sells refurbished devices": 28, "Concerns about refurbished quality or reliability": 18, "Limited availability of the model or variant I wanted": 17, "Prefer buying brand-new devices only": 17, "Found a better price or offer elsewhere": 15, "Trust in refurbished devices was low": 15, "Warranty or return policy was unclear": 13, "Unsure about battery health or actual device condition": 13, "Negative reviews or word-of-mouth influenced me": 12, "Delivery time did not work for me": 7, "Prefer buying from offline / in-store channels": 7, "Other (Please specify)": 5}, "cat_drivers": {"Warranty": 1075, "Battery health score": 1069, "Certified refurbisher (brand assurance)": 1041, "Replacement guarantee": 966, "Lower price vs new": 939, "Looks / feels like new": 909, "Reviews / testimonials": 841, "32/64 point quality check": 787, "Trial window": 701, "EMI available": 522, "Other": 117}, "fears": {"Fear of bad quality": 1279, "Fear of fake/duplicate parts": 1243, "Warranty doubts": 1111, "No trust in seller": 1109, "Data privacy concern": 1064, "Prefer only brand\u2013new phones": 1032, "Don\u2019t know where to buy safely": 952, "Social stigma / family opinion": 706, "Other": 117}}, "buy": {"total": 1525, "city": {"Delhi NCR": 556, "Tier-2 / Tier-3 (Specify)": 534, "Mumbai": 121, "Bangalore": 99, "Kolkata": 72, "Hyderabad": 61, "Ahmedabad": 43, "Chennai": 39}, "gender": {"Male": 768, "Female": 495, "Prefer not to say": 139, "Other": 123}, "age": {"18\u201325": 651, "26\u201335": 404, "46+": 194, "36\u201345": 151, "<18": 125}, "income": {">\u20b92L": 382, "\u20b91\u20131.5L": 246, "\u20b975k\u20131L": 225, "\u20b950\u201375k": 198, "\u20b91.5\u20132L": 193, "\u20b925\u201350k": 153, "<\u20b925k": 128}, "tom": {"Cashify": 359, "Olx": 218, "Amazon": 69, "Flipkart": 29, "Cashify, Olx": 15, "Amazon, Flipkart": 11, "Local Shop": 10, "Olx, Cashify": 8, "Offline": 6, "Facebook": 5}, "spont": {"Olx": 118, "Cashify": 101, "Amazon": 91, "Flipkart": 64, "Facebook Marketplace": 10, "Quickr": 8, "Local Shop": 8, "Ebay": 7, "Local Shops": 6, "Offline Store": 5}, "aided": {"Cashify": 1019, "OLX": 1016, "Amazon Exchange": 790, "Flipkart Exchange": 679, "Quickr": 667, "Flipkart reset": 505, "PhoneCash": 259, "Refit Global": 255, "GetInstaCash": 240, "Other (specify)": 21}, "familiarity": {"Cashify": {"Heard a lot but never considered using it": 309, "Have considered using it but never used": 286, "Heard a little but never considered using it": 259, "Never heard of it": 227, "Have used it to sell an old device but it was sometime back.": 199, "I used it recently to sell my device within last 6 months": 170}, "OLX": {"Heard a lot but never considered using it": 359, "Have considered using it but never used": 317, "Heard a little but never considered using it": 259, "Have used it to sell an old device but it was sometime back.": 212, "Never heard of it": 171, "I used it recently to sell my device within last 6 months": 132}, "Quikr": {"Never heard of it": 364, "Heard a little but never considered using it": 308, "Heard a lot but never considered using it": 290, "Have considered using it but never used": 228, "Have used it to sell an old device but it was sometime back.": 134, "I used it recently to sell my device within last 6 months": 126}, "Amazon Exch": {"Never heard of it": 491, "Heard a little but never considered using it": 259, "Have considered using it but never used": 235, "Heard a lot but never considered using it": 203, "Have used it to sell an old device but it was sometime back.": 140, "I used it recently to sell my device within last 6 months": 122}, "Flipkart Exch": {"Never heard of it": 708, "Heard a little but never considered using it": 173, "Heard a lot but never considered using it": 172, "Have considered using it but never used": 150, "I used it recently to sell my device within last 6 months": 129, "Have used it to sell an old device but it was sometime back.": 118}, "Local Dealer": {"Never heard of it": 697, "Heard a little but never considered using it": 174, "Heard a lot but never considered using it": 172, "Have considered using it but never used": 166, "Have used it to sell an old device but it was sometime back.": 124, "I used it recently to sell my device within last 6 months": 117}}, "consideration": {"Cashify": {"I might consider it": 507, "It would be my first choice": 335, "I would seriously consider it": 304, "I would not consider it": 304}, "OLX": {"I might consider it": 554, "I would not consider it": 342, "I would seriously consider it": 341, "It would be my first choice": 213}, "Quikr": {"I might consider it": 527, "I would not consider it": 510, "I would seriously consider it": 251, "It would be my first choice": 162}, "Amazon Exch": {"I might consider it": 549, "I would not consider it": 455, "I would seriously consider it": 249, "It would be my first choice": 197}, "Flipkart Exch": {"I would not consider it": 738, "I might consider it": 350, "I would seriously consider it": 193, "It would be my first choice": 169}, "Local Dealer": {"I would not consider it": 719, "I might consider it": 368, "I would seriously consider it": 209, "It would be my first choice": 154}}, "nps": {"Cashify": {"nps": -20.4, "promoters": 412, "passives": 330, "detractors": 708, "total": 1450, "pp": 28.4, "dp": 48.8, "pap": 22.8, "avg": 6.1}, "OLX": {"nps": -40.6, "promoters": 259, "passives": 343, "detractors": 848, "total": 1450, "pp": 17.9, "dp": 58.5, "pap": 23.7, "avg": 5.3}, "Quikr": {"nps": -58.0, "promoters": 158, "passives": 293, "detractors": 999, "total": 1450, "pp": 10.9, "dp": 68.9, "pap": 20.2, "avg": 4.6}, "Amazon Exch": {"nps": -53.1, "promoters": 172, "passives": 336, "detractors": 942, "total": 1450, "pp": 11.9, "dp": 65.0, "pap": 23.2, "avg": 4.9}, "Flipkart Exch": {"nps": -71.7, "promoters": 116, "passives": 178, "detractors": 1156, "total": 1450, "pp": 8.0, "dp": 79.7, "pap": 12.3, "avg": 3.8}, "Local Dealer": {"nps": -70.8, "promoters": 115, "passives": 193, "detractors": 1142, "total": 1450, "pp": 7.9, "dp": 78.8, "pap": 13.3, "avg": 3.6}}, "funnel": {"Cashify": {"aware": 1298, "familiar": 1223, "considered": 639, "used": 369, "aware_pct": 85.1, "familiar_pct": 80.2, "considered_pct": 41.9, "used_pct": 24.2}, "OLX": {"aware": 1354, "familiar": 1279, "considered": 554, "used": 344, "aware_pct": 88.8, "familiar_pct": 83.9, "considered_pct": 36.3, "used_pct": 22.6}, "Quikr": {"aware": 1161, "familiar": 1086, "considered": 413, "used": 260, "aware_pct": 76.1, "familiar_pct": 71.2, "considered_pct": 27.1, "used_pct": 17.0}, "Amazon Exch": {"aware": 1034, "familiar": 959, "considered": 446, "used": 262, "aware_pct": 67.8, "familiar_pct": 62.9, "considered_pct": 29.2, "used_pct": 17.2}, "Flipkart Exch": {"aware": 817, "familiar": 742, "considered": 362, "used": 247, "aware_pct": 53.6, "familiar_pct": 48.7, "considered_pct": 23.7, "used_pct": 16.2}, "Local Dealer": {"aware": 828, "familiar": 753, "considered": 363, "used": 241, "aware_pct": 54.3, "familiar_pct": 49.4, "considered_pct": 23.8, "used_pct": 15.8}}, "intent": {"No": 1091, "Yes": 353, "Don\u2019t remember": 64}, "ever_used": {"Other": 206, "To upgrade to a new phone immediately": 109, "To earn money / cash": 20, "Phone stopped working": 18}, "drivers": {"Quick estimate": 66, "Data safety": 66, "Easy process": 64, "Instant payment": 52, "Good price": 41, "Trust/Verified": 35, "Home pickup": 32, "No negotiation": 28, "Warranty": 27, "Reviews/Ratings": 24, "Brand name": 18}, "barriers": {"Other": 106, "Prefer selling to known local shop": 43, "Price offered is low": 30, "Didn\u2019t know about it": 21, "Prefer exchange on Amazon/Flipkart": 16, "Prefer OLX negotiation for higher price": 8, "Concern about data privacy": 5, "Stores not nearby": 2, "Don\u2019t trust process": 2}, "cat_drivers": {"Verified platform / official brand": 727, "Instant payment": 701, "Price quote matches final value": 671, "Customer support": 627, "App rating/reviews": 579, "Technician checks phone in front of me (NEW \u2013 Transparency Trust)": 567, "Formal Data Wiping Certificate (NEW \u2013 Process Trust)": 564, "Safe location / Meet-at-store": 560, "Buyback guarantee": 486, "No negotiation": 382, "Other": 39}, "fears": {"Fraudulent buyer": 926, "Data theft / privacy": 896, "Payment delay": 813, "Low price": 771, "Negotiation stress": 731, "Stranger coming home": 646, "Other": 47}}, "b8ref": {"total": 12, "nps": {"Cashify": {"nps": -20.0, "promoters": 3, "passives": 2, "detractors": 5, "total": 10, "pp": 30.0, "dp": 50.0, "pap": 20.0, "avg": 6.3}, "Amazon Renewed": {"nps": -50.0, "promoters": 1, "passives": 3, "detractors": 6, "total": 10, "pp": 10.0, "dp": 60.0, "pap": 30.0, "avg": 5.1}, "Flipkart Reset": {"nps": -60.0, "promoters": 1, "passives": 2, "detractors": 7, "total": 10, "pp": 10.0, "dp": 70.0, "pap": 20.0, "avg": 4.3}, "OLX": {"nps": -70.0, "promoters": 1, "passives": 1, "detractors": 8, "total": 10, "pp": 10.0, "dp": 80.0, "pap": 10.0, "avg": 4.6}, "Quikr": {"nps": -70.0, "promoters": 0, "passives": 3, "detractors": 7, "total": 10, "pp": 0.0, "dp": 70.0, "pap": 30.0, "avg": 4.8}, "Facebook Mkt": {"nps": -90.0, "promoters": 0, "passives": 1, "detractors": 9, "total": 10, "pp": 0.0, "dp": 90.0, "pap": 10.0, "avg": 3.9}}}, "b8buy": {"total": 70, "nps": {"Cashify": {"nps": 61.2, "promoters": 53, "passives": 2, "detractors": 12, "total": 67, "pp": 79.1, "dp": 17.9, "pap": 3.0, "avg": 8.7}, "OLX": {"nps": -77.6, "promoters": 6, "passives": 3, "detractors": 58, "total": 67, "pp": 9.0, "dp": 86.6, "pap": 4.5, "avg": 3.3}, "Quikr": {"nps": -91.0, "promoters": 1, "passives": 4, "detractors": 62, "total": 67, "pp": 1.5, "dp": 92.5, "pap": 6.0, "avg": 2.8}, "Amazon Exch": {"nps": -19.4, "promoters": 15, "passives": 24, "detractors": 28, "total": 67, "pp": 22.4, "dp": 41.8, "pap": 35.8, "avg": 6.6}, "Flipkart Exch": {"nps": -88.1, "promoters": 3, "passives": 2, "detractors": 62, "total": 67, "pp": 4.5, "dp": 92.5, "pap": 3.0, "avg": 2.8}, "Local Dealer": {"nps": -88.1, "promoters": 2, "passives": 4, "detractors": 61, "total": 67, "pp": 3.0, "dp": 91.0, "pap": 6.0, "avg": 3.1}}}};
+
+// ── Helpers ──
+const C = (id) => document.getElementById(id);
+const CASHIFY_COLOR = '#f97316';
+const PALETTE = ['#f97316','#6366f1','#10b981','#3b82f6','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#ef4444','#84cc16'];
+const SOFT = (hex, a=.15) => hex.replace('#','')
+  .match(/.{2}/g).map(x=>parseInt(x,16));
+
+function mkChart(id, type, labels, datasets, opts={}) {
+  const el = C(id); if(!el) return;
+  const ctx = el.getContext('2d');
+  Chart.defaults.color = '#94a3b8';
+  Chart.defaults.borderColor = '#1e2d47';
+  return new Chart(ctx, { type, data:{labels,datasets}, options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#94a3b8',font:{family:'Inter',size:11}}}, tooltip:{...opts.tooltip}},
+    scales: type!=='pie'&&type!=='doughnut'&&type!=='radar' ? {
+      x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8',font:{size:11}},...(opts.x||{})},
+      y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8',font:{size:11}},...(opts.y||{})}
+    } : {},
+    ...(opts.extra||{})
+  }});
+}
+
+function mkBars(containerId, data, color=CASHIFY_COLOR, maxVal=null) {
+  const el = C(containerId); if(!el) return;
+  const entries = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if(!entries.length){el.innerHTML='<p style="color:#64748b;padding:10px">No data</p>';return;}
+  const top = maxVal || entries[0][1];
+  el.innerHTML = entries.map(([k,v]) => {
+    const pct = Math.round(v/top*100);
+    return `<div class="bar-row">
+      <div class="bar-label" title="${k}">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div>
+      <div class="bar-count">${v}</div>
+    </div>`;
+  }).join('');
+}
+
+function mkNPSCard(valId, barId, detailId, brand, data) {
+  if(!data||!data[brand]) return;
+  const d = data[brand];
+  const el = C(valId); if(!el) return;
+  el.textContent = (d.nps>=0?'+':'')+d.nps;
+  el.className = 'kpi-val '+(d.nps>=0?'nps-pos':'nps-neg');
+  const bar = C(barId);
+  if(bar) bar.innerHTML = `<div class="nps-p" style="width:${d.pp}%"></div><div class="nps-pa" style="width:${d.pap}%"></div><div class="nps-d" style="width:${d.dp}%"></div>`;
+  const detail = C(detailId);
+  if(detail) detail.textContent = `Promoters ${d.pp}% · Passives ${d.pap}% · Detractors ${d.dp}% · Avg ${d.avg}/10`;
+}
+
+function mkNPSTable(tbodyId, npsData) {
+  const tbody = C(tbodyId); if(!tbody) return;
+  const rows = Object.entries(npsData).sort((a,b)=>b[1].nps-a[1].nps);
+  tbody.innerHTML = rows.map(([brand,d],i) => `<tr class="${brand==='Cashify'?'highlight':''}">
+    <td class="rank">${i+1}</td>
+    <td><strong>${brand}</strong></td>
+    <td><strong style="color:${d.nps>=0?'#10b981':'#ef4444'}">${d.nps>=0?'+':''}${d.nps}</strong></td>
+    <td><span class="pill pill-green">${d.pp}%</span></td>
+    <td><span class="pill pill-yellow">${d.pap}%</span></td>
+    <td><span class="pill pill-red">${d.dp}%</span></td>
+    <td>${d.avg}/10</td>
+    <td style="color:#64748b">${d.total}</td>
+  </tr>`).join('');
+}
+
+function mkFunnelTable(tbodyId, funnelData) {
+  const tbody = C(tbodyId); if(!tbody) return;
+  tbody.innerHTML = Object.entries(funnelData).map(([brand,d]) => `<tr class="${brand==='Cashify'?'highlight':''}">
+    <td><strong>${brand}</strong></td>
+    <td>${d.aware_pct}%</td>
+    <td>${d.familiar_pct}%</td>
+    <td>${d.considered_pct}%</td>
+    <td>${d.used_pct}%</td>
+  </tr>`).join('');
+}
+
+// ── Page navigation ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  C('page-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function switchNPS(mode) {
+  C('nps-ref-section').style.display = mode==='ref'?'block':'none';
+  C('nps-buy-section').style.display = mode==='buy'?'block':'none';
+  C('sw-ref-nps').className = 'sw '+(mode==='ref'?'on':'');
+  C('sw-buy-nps').className = 'sw '+(mode==='buy'?'on':'');
+}
+function switchFunnel(mode) {
+  C('funnel-ref-section').style.display = mode==='ref'?'block':'none';
+  C('funnel-buy-section').style.display = mode==='buy'?'block':'none';
+  C('sw-ref-funnel').className = 'sw '+(mode==='ref'?'on':'');
+  C('sw-buy-funnel').className = 'sw '+(mode==='buy'?'on':'');
+}
+
+// ── BUILD CHARTS ──
+window.addEventListener('load', () => {
+
+  // Overview KPIs
+  C('ref-nps-val').textContent = (D.ref.nps.Cashify?.nps||0)+'';
+  C('buy-nps-val').textContent = (D.buy.nps.Cashify?.nps||0)+'';
+
+  // City charts
+  const refCities = Object.entries(D.ref.city).slice(0,7);
+  mkChart('city-ref-chart','bar',refCities.map(x=>x[0]),[{label:'Respondents',data:refCities.map(x=>x[1]),backgroundColor:PALETTE,borderRadius:6,borderSkipped:false}],{extra:{plugins:{legend:{display:false}}},y:{beginAtZero:true}});
+
+  const buyCities = Object.entries(D.buy.city).slice(0,7);
+  mkChart('city-buy-chart','bar',buyCities.map(x=>x[0]),[{label:'Respondents',data:buyCities.map(x=>x[1]),backgroundColor:PALETTE,borderRadius:6,borderSkipped:false}],{extra:{plugins:{legend:{display:false}}},y:{beginAtZero:true}});
+
+  // Gender
+  const gRef = D.ref.gender;
+  mkChart('gender-ref-chart','doughnut',Object.keys(gRef),[{data:Object.values(gRef),backgroundColor:['#6366f1','#ec4899','#f59e0b'],borderWidth:2,borderColor:'#1a2235'}]);
+
+  // Age
+  const aRef = D.ref.age;
+  const ageOrder = ['<18','18–25','26–35','36–45','46+'];
+  const ageLabs = ageOrder.filter(k=>aRef[k]);
+  mkChart('age-ref-chart','bar',ageLabs,[{label:'Count',data:ageLabs.map(k=>aRef[k]||0),backgroundColor:'#6366f1',borderRadius:5,borderSkipped:false}],{y:{beginAtZero:true},extra:{plugins:{legend:{display:false}}}});
+
+  // Income
+  const inc = D.ref.income;
+  mkChart('income-ref-chart','doughnut',Object.keys(inc),[{data:Object.values(inc),backgroundColor:['#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6'],borderWidth:2,borderColor:'#1a2235'}]);
+
+  // TOM
+  const tomRef = Object.entries(D.ref.tom).slice(0,8);
+  mkChart('tom-ref-chart','bar',tomRef.map(x=>x[0]),[{label:'Mentions',data:tomRef.map(x=>x[1]),backgroundColor:'#f97316',borderRadius:5,borderSkipped:false}],{x:{ticks:{font:{size:10}}},y:{beginAtZero:true},extra:{plugins:{legend:{display:false}}}});
+
+  const tomBuy = Object.entries(D.buy.tom).slice(0,8);
+  mkChart('tom-buy-chart','bar',tomBuy.map(x=>x[0]),[{label:'Mentions',data:tomBuy.map(x=>x[1]),backgroundColor:'#6366f1',borderRadius:5,borderSkipped:false}],{x:{ticks:{font:{size:10}}},y:{beginAtZero:true},extra:{plugins:{legend:{display:false}}}});
+
+  // ── REFURBISHED PAGE ──
+  mkBars('aided-ref-bars', D.ref.aided, '#f97316');
+  mkBars('spont-ref-bars', D.ref.spont, '#6366f1');
+  const srcCashify = D.ref.src?.Cashify || {};
+  const srcCleaned = {};
+  for(const [k,v] of Object.entries(srcCashify)){
+    for(const s of k.split(',')){const t=s.trim();if(t&&t!=='nan')srcCleaned[t]=(srcCleaned[t]||0)+v;}
+  }
+  mkBars('src-cashify-bars', Object.fromEntries(Object.entries(srcCleaned).sort((a,b)=>b[1]-a[1]).slice(0,8)), '#10b981');
+
+  // Familiarity radar/grouped bar
+  const famPlatforms = Object.keys(D.ref.familiarity);
+  const famKeys = ['Have used it to buy refurbished device but it was sometime back.','Have considered using it but never used','Heard a lot but never considered','Heard a little but never considered using it','Never heard of it'];
+  const famLabels = ['Used (past)','Considered/Never Used','Heard A Lot','Heard A Little','Never Heard'];
+  mkChart('famil-ref-chart','bar',famPlatforms, famKeys.map((k,i)=>({
+    label:famLabels[i],
+    data:famPlatforms.map(p=>(D.ref.familiarity[p]||{})[k]||0),
+    backgroundColor:PALETTE[i],borderRadius:3,borderSkipped:false
+  })),{extra:{plugins:{legend:{display:true}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}},y:{beginAtZero:true}});
+
+  const conPlatforms = Object.keys(D.ref.consideration);
+  const conKeys = ['It would be my first choice','I would seriously consider it','I might consider it','I would not consider it'];
+  const conLabels = ['1st Choice','Seriously Consider','Might Consider','Would Not'];
+  mkChart('consid-ref-chart','bar',conPlatforms, conKeys.map((k,i)=>({
+    label:conLabels[i],
+    data:conPlatforms.map(p=>(D.ref.consideration[p]||{})[k]||0),
+    backgroundColor:[CASHIFY_COLOR,'#6366f1','#f59e0b','#ef4444'][i],borderRadius:3,borderSkipped:false
+  })),{extra:{plugins:{legend:{display:true}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
+
+  // KPIs
+  const eu = D.ref.ever_used;
+  const euPct = eu['Yes'] ? Math.round(eu['Yes']/(eu['Yes']+(eu['No']||0))*100) : 0;
+  C('ref-ever-buy').textContent = euPct+'%';
+  const intentData = D.ref.intent;
+  const posIntent = (intentData['Definitely would']||0)+(intentData['Probably would']||0);
+  const totIntent = Object.values(intentData).reduce((a,b)=>a+b,0);
+  C('ref-intent').textContent = totIntent>0?Math.round(posIntent/totIntent*100)+'%':'–';
+  const ch = D.ref.channel;
+  const online = ch['Online']||0; const offline = ch['Offline']||0;
+  C('ref-online-pct').textContent = (online+offline)>0?Math.round(online/(online+offline)*100)+'%':'–';
+
+  mkBars('cat-drivers-ref-bars', D.ref.cat_drivers, '#10b981');
+  mkBars('fears-ref-bars', D.ref.fears, '#ef4444');
+
+  // ── BUYBACK PAGE ──
+  mkBars('aided-buy-bars', D.buy.aided, '#6366f1');
+
+  const buyFamPlatforms = Object.keys(D.buy.familiarity);
+  mkChart('famil-buy-chart','bar',buyFamPlatforms, famKeys.map((k,i)=>({
+    label:famLabels[i],
+    data:buyFamPlatforms.map(p=>(D.buy.familiarity[p]||{})[k]||0),
+    backgroundColor:PALETTE[i],borderRadius:3,borderSkipped:false
+  })),{extra:{plugins:{legend:{display:true}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
+
+  const buyConPlatforms = Object.keys(D.buy.consideration);
+  mkChart('consid-buy-chart','bar',buyConPlatforms, conKeys.map((k,i)=>({
+    label:conLabels[i],
+    data:buyConPlatforms.map(p=>(D.buy.consideration[p]||{})[k]||0),
+    backgroundColor:[CASHIFY_COLOR,'#6366f1','#f59e0b','#ef4444'][i],borderRadius:3,borderSkipped:false
+  })),{extra:{plugins:{legend:{display:true}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
+
+  mkBars('cat-drivers-buy-bars', D.buy.cat_drivers, '#10b981');
+  mkBars('barriers-buy-bars', D.buy.barriers, '#ef4444');
+  mkBars('fears-buy-bars', D.buy.fears||{}, '#f59e0b');
+
+  // Buyback drivers chart
+  const buyDrv = Object.entries(D.buy.drivers).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  mkChart('drivers-buy-chart','bar',buyDrv.map(x=>x[0]),[{data:buyDrv.map(x=>x[1]),backgroundColor:'#6366f1',borderRadius:5}],{x:{ticks:{font:{size:10}}},y:{beginAtZero:true},extra:{indexAxis:'y'}});
+
+  // ── NPS PAGE ──
+  mkNPSCard('nps-cashify-ref','nps-cr-bar','nps-cr-detail','Cashify',D.ref.nps);
+  mkNPSCard('nps-cashify-buy','nps-cb-bar','nps-cb-detail','Cashify',D.buy.nps);
+  mkNPSTable('nps-ref-table', D.ref.nps);
+  mkNPSTable('nps-buy-table', D.buy.nps);
+
+  const npsRefEntries = Object.entries(D.ref.nps).sort((a,b)=>b[1].nps-a[1].nps);
+  mkChart('nps-ref-chart','bar',npsRefEntries.map(x=>x[0]),[{
+    label:'NPS Score',
+    data:npsRefEntries.map(x=>x[1].nps),
+    backgroundColor:npsRefEntries.map(x=>x[1].nps>=0?'#10b981':'#ef4444'),
+    borderRadius:6
+  }],{y:{beginAtZero:false},extra:{plugins:{legend:{display:false}}}});
+
+  const npsBuyEntries = Object.entries(D.buy.nps).sort((a,b)=>b[1].nps-a[1].nps);
+  mkChart('nps-buy-chart','bar',npsBuyEntries.map(x=>x[0]),[{
+    label:'NPS Score',
+    data:npsBuyEntries.map(x=>x[1].nps),
+    backgroundColor:npsBuyEntries.map(x=>x[1].nps>=0?'#10b981':'#ef4444'),
+    borderRadius:6
+  }],{y:{beginAtZero:false},extra:{plugins:{legend:{display:false}}}});
+
+  // ── FUNNEL PAGE ──
+  const funnelRefBrands = Object.keys(D.ref.funnel);
+  mkChart('funnel-ref-chart','bar',funnelRefBrands,[
+    {label:'Aware %',data:funnelRefBrands.map(b=>D.ref.funnel[b].aware_pct),backgroundColor:'#6366f1',borderRadius:4,borderSkipped:false},
+    {label:'Familiar %',data:funnelRefBrands.map(b=>D.ref.funnel[b].familiar_pct),backgroundColor:'#3b82f6',borderRadius:4,borderSkipped:false},
+    {label:'Considered %',data:funnelRefBrands.map(b=>D.ref.funnel[b].considered_pct),backgroundColor:'#f59e0b',borderRadius:4,borderSkipped:false},
+    {label:'Used %',data:funnelRefBrands.map(b=>D.ref.funnel[b].used_pct),backgroundColor:'#10b981',borderRadius:4,borderSkipped:false},
+  ],{extra:{plugins:{legend:{display:true}},scales:{x:{},y:{beginAtZero:true,max:110}}}});
+  mkFunnelTable('funnel-ref-table', D.ref.funnel);
+
+  const funnelBuyBrands = Object.keys(D.buy.funnel);
+  mkChart('funnel-buy-chart','bar',funnelBuyBrands,[
+    {label:'Aware %',data:funnelBuyBrands.map(b=>D.buy.funnel[b].aware_pct),backgroundColor:'#6366f1',borderRadius:4,borderSkipped:false},
+    {label:'Familiar %',data:funnelBuyBrands.map(b=>D.buy.funnel[b].familiar_pct),backgroundColor:'#3b82f6',borderRadius:4,borderSkipped:false},
+    {label:'Considered %',data:funnelBuyBrands.map(b=>D.buy.funnel[b].considered_pct),backgroundColor:'#f59e0b',borderRadius:4,borderSkipped:false},
+    {label:'Used %',data:funnelBuyBrands.map(b=>D.buy.funnel[b].used_pct),backgroundColor:'#10b981',borderRadius:4,borderSkipped:false},
+  ],{extra:{plugins:{legend:{display:true}},scales:{x:{},y:{beginAtZero:true,max:110}}}});
+  mkFunnelTable('funnel-buy-table', D.buy.funnel);
+
+  // ── DRIVERS PAGE ──
+  const refDrv = Object.entries(D.ref.drivers).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  mkChart('drivers-ref-chart','bar',refDrv.map(x=>x[0]),[{data:refDrv.map(x=>x[1]),backgroundColor:CASHIFY_COLOR,borderRadius:5}],{x:{ticks:{font:{size:10}}},y:{beginAtZero:true},extra:{indexAxis:'y'}});
+
+  const buyDrv2 = Object.entries(D.buy.drivers).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  mkChart('drivers-buy2-chart','bar',buyDrv2.map(x=>x[0]),[{data:buyDrv2.map(x=>x[1]),backgroundColor:'#6366f1',borderRadius:5}],{x:{ticks:{font:{size:10}}},y:{beginAtZero:true},extra:{indexAxis:'y'}});
+
+  mkBars('barriers-ref-bars', D.ref.barriers, '#ef4444');
+  mkBars('barriers-buy2-bars', D.buy.barriers, '#ef4444');
+  mkBars('cat-drivers-ref2-bars', D.ref.cat_drivers, '#10b981');
+  mkBars('cat-drivers-buy2-bars', D.buy.cat_drivers, '#10b981');
+});
+</script>
+</body>
+</html>
